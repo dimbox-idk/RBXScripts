@@ -50,12 +50,7 @@ if not getrenv().Network then
 				for _,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
 					coroutine.wrap(function()
 						Part.Velocity = Vector3.new(14.465,14.465,14.465)
-						if not isnetworkowner(Part) then --lag parts my ownership is contesting but dont have network over to spite the people who have ownership of stuff i want >:(
-							print("[NETWORK] Part "..Part:GetFullName().." is not owned. Contesting ownership...")
-							sethiddenproperty(Part,"NetworkIsSleeping",true)
-						else
-							sethiddenproperty(Part,"NetworkIsSleeping",false)
-						end
+						sethiddenproperty(Part,"NetworkIsSleeping",false)
 						LocalPlayer.ReplicationFocus = Part
 						--[==[ [[by 4eyes btw]] ]==]
 					end)()
