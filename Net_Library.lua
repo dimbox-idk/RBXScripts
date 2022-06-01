@@ -5,6 +5,7 @@ local LocalPlayer = Players.LocalPlayer
 --[[
 Network Library by 4eyes
 Usage: Put this in your script and use Network.RetainPart(Part) on any part you'd like to retain ownership over, then just apply a replicating method of movement. Credit me if you'd like.
+loadstring(game:HttpGet("https://raw.githubusercontent.com/your4eyes/RobloxScripts/main/Net_Library.lua"))()
 --]]
 if not getgenv().Network then
 	getgenv().Network = {}
