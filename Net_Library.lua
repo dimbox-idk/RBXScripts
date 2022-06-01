@@ -21,7 +21,7 @@ if not getgenv().Network then
 			end
 			local BV = Instance.new("BodyVelocity") --create bodyvelocity to apply constant physics packets and retain ownership
 			BV.Name = "NetworkRetainer"
-        		BV.MaxForce = Vector3.new(1/0,1/0,1/0)
+		BV.MaxForce = Vector3.new(1/0,1/0,1/0)
 			BV.P = 1/0
 			BV.Velocity = Vector3.new(30,30,30)
 			BV.Parent = Part
