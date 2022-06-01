@@ -23,7 +23,7 @@ if not getgenv().Network then
 			BV.Name = "NetworkRetainer"
         		BV.MaxForce = Vector3.new(1/0,1/0,1/0)
 			BV.P = 1/0
-			BV.Velocity = Vector3.new(30,30,30)
+			BV.Velocity = Vector3.new(50,50,50)
 			BV.Parent = Part
 			table.insert(Network["BaseParts"],Part)
 		end
