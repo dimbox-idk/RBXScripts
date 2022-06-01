@@ -44,6 +44,7 @@ if not getgenv().Network then
 			setscriptable(workspace,"PhysicsSimulationRateReplicator",true)
 			settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
 			workspace.PhysicsSimulationRateReplicator = Enum.PhysicsSimulationRate.Fixed240Hz
+			workspace.InterpolationThrottling = Enum.InterpolationThrottling.Enabled
 			workspace.PhysicsSteppingMethod = Enum.PhysicsSteppingMethod.Fixed
 			LocalPlayer.ReplicationFocus = workspace
 			settings().Physics.AllowSleep = false
