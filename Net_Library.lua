@@ -54,16 +54,23 @@ if not getgenv().Network then
 		end)
 	end
 	Network["PartOwnership"] = {}
+	Network["PartOwnership"]["PreMethodSettings"] = {}
 	Network["PartOwnership"]["Enabled"] = false
-	Network["PartOwnership"]["Execute"] = coroutine.create(function() --creating a thread for network stuff
+	Network["PartOwnership"]["Enable"] = coroutine.create(function() --creating a thread for network stuff
 		if Network["PartOwnership"]["Enabled"] == false then
 			Network["PartOwnership"]["Enabled"] = true --do cool network stuff before doing more cool network stuff
 			setscriptable(workspace,"PhysicsSteppingMethod",true)
 			setscriptable(workspace,"PhysicsSimulationRateReplicator",true)
+			Network["PartOwnership"]["PreMethodSettings"].PhysicsEnvironmentalThrottle = settings().Physics.PhysicsEnvironmentalThrottle
 			settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+			Network["PartOwnership"]["PreMethodSettings"].PhysicsSimulationRateReplicator = workspace.PhysicsSimulationRateReplicator
 			workspace.PhysicsSimulationRateReplicator = Enum.PhysicsSimulationRate.Fixed240Hz
+			Network["PartOwnership"]["PreMethodSettings"].InterpolationThrottling = workspace.InterpolationThrottling
 			workspace.InterpolationThrottling = Enum.InterpolationThrottling.Enabled
+			Network["PartOwnership"]["PreMethodSettings"].PhysicsSteppingMethod = workspace.PhysicsSteppingMethod
 			workspace.PhysicsSteppingMethod = Enum.PhysicsSteppingMethod.Fixed
+			setscriptable(workspace,"PhysicsSimulationRateReplicator",false)
+			setscriptable(workspace,"PhysicsSteppingMethod",false)
 			settings().Rendering.EagerBulkExecution = true
 			settings().Physics.ThrottleAdjustTime = 1/0
 			LocalPlayer.ReplicationFocus = workspace
@@ -71,7 +78,7 @@ if not getgenv().Network then
 			settings().Physics.AllowSleep = false
 			settings().Physics.ForceCSGv2 = false
 			settings().Physics.UseCSGv2 = false
-			Network["SuperStepper"].Event:Connect(function() --super fast asynchronous loop
+			Network["PartOwnership"]["Connection"] = Network["SuperStepper"].Event:Connect(function() --super fast asynchronous loop
 				sethiddenproperty(LocalPlayer,"SimulationRadius",1/0)
 				for i,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
 					coroutine.wrap(function()
@@ -104,7 +111,9 @@ if not getgenv().Network then
 		end
 	end)
 	Network["PartOwnership"]["Disable"] = coroutine.create(function()
-		--ill do it later bleh
+		if Network["PartOwnership"]["Connection"] then
+			Network["PartOwnership"]["Connection"]:Disconnect()
+		end
 	end)
-	coroutine.resume(Network["PartOwnership"]["Execute"])
+	coroutine.resume(Network["PartOwnership"]["Enable"])
 end
