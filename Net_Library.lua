@@ -2,6 +2,7 @@ repeat task.wait() until game:IsLoaded()
 local Players = game:GetService("Players") --define variables n shit
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
+local Velocity = Vector3.new(30,30,30)
 --[[
 Network Library by 4eyes
 Usage: Put this in your script and use Network.RetainPart(Part) on any part you'd like to retain ownership over, then just apply a replicating method of movement. Credit me if you'd like.
@@ -10,6 +11,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/your4eyes/RobloxScrip
 if not getgenv().Network then
 	getgenv().Network = {}
 	Network["BaseParts"] = {}
+	Network["Velocity"] = Velocity
 	Network["RetainPart"] = function(Part) --function for retaining ownership of unanchored parts
 		if Part:IsA("BasePart") and Part:IsDescendantOf(workspace) and not isnetworkowner(Part) then
 			local CParts = Part:GetConnectedParts()
@@ -23,7 +25,7 @@ if not getgenv().Network then
 			BV.Name = "NetworkRetainer"
 			BV.MaxForce = Vector3.new(1/0,1/0,1/0)
 			BV.P = 1/0
-			BV.Velocity = Vector3.new(30,30,30)
+			BV.Velocity = Network["Velocity"]
 			BV.Parent = Part
 			table.insert(Network["BaseParts"],Part)
 		end
@@ -46,8 +48,13 @@ if not getgenv().Network then
 			workspace.PhysicsSimulationRateReplicator = Enum.PhysicsSimulationRate.Fixed240Hz
 			workspace.InterpolationThrottling = Enum.InterpolationThrottling.Enabled
 			workspace.PhysicsSteppingMethod = Enum.PhysicsSteppingMethod.Fixed
+			settings().Rendering.EagerBulkExecution = true
+			settings().Physics.ThrottleAdjustTime = 1/0
 			LocalPlayer.ReplicationFocus = workspace
+			settings().Physics.DisableCSGv2 = true
 			settings().Physics.AllowSleep = false
+			settings().Physics.ForceCSGv2 = false
+			settings().Physics.UseCSGv2 = false
 			Network["SuperStepper"].Event:Connect(function() --super fast asynchronous loop
 				sethiddenproperty(LocalPlayer,"SimulationRadius",1/0)
 				for i,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
