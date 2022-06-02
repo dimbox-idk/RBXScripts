@@ -50,7 +50,7 @@ if not getgenv().Network then
 				warn("[NETWORK] Part "..Part:GetFullName().." not found in BaseParts table.")
 			end
 		end
-	end)
+	end
 	Network["SuperStepper"] = Instance.new("BindableEvent") --make super fast event to connect to
 	setfflag("NewRunServiceSignals","true")
 	for _,Event in pairs({RunService.RenderStepped,RunService.Heartbeat,RunService.Stepped,RunService.PreSimulation,RunService.PostSimulation}) do
