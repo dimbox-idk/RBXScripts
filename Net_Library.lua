@@ -17,7 +17,7 @@ if not getgenv().Network then
 			local CParts = Part:GetConnectedParts()
 			for _,CPart in pairs(CParts) do --check if part is connected to anything already in baseparts being retained
 				if table.find(Network["BaseParts"],CPart) then
-					print("Did not apply PartOwnership to part, as it is already connected to a part with this method active.") 
+					warn("[NETWORK] Did not apply PartOwnership to part, as it is already connected to a part with this method active.") 
 					return
 				end
 			end
@@ -28,8 +28,24 @@ if not getgenv().Network then
 			BV.Velocity = Network["Velocity"]
 			BV.Parent = Part
 			table.insert(Network["BaseParts"],Part)
+			print("[NETWORK] PartOwnership applied to part"..Part:GetFullName()..".")
 		end
 	end
+	Network["RemovePart"] = function(Part) --function for removing ownership of unanchored part
+		if Part:IsA("BasePart") and Part:IsDescendantOf(workspace) then
+			local Index = table.find(Network["BaseParts"],Part)
+			if Index then
+				table.remove(Network["BaseParts"],Index)
+				local Retainer = Part:FindFirstChild("NetworkRetainer")
+				if Retainer then
+					Retainer:Destroy()
+				end
+				print("[NETWORK] PartOwnership removed from part "..Part:GetFullName()..".")
+			else
+				warn("[NETWORK] Part "..Part:GetFullName().." not found in BaseParts table.")
+			end
+		end
+	end)
 	Network["SuperStepper"] = Instance.new("BindableEvent") --make super fast event to connect to
 	setfflag("NewRunServiceSignals","true")
 	for _,Event in pairs({RunService.RenderStepped,RunService.Heartbeat,RunService.Stepped,RunService.PreSimulation,RunService.PostSimulation}) do
@@ -66,6 +82,14 @@ if not getgenv().Network then
 							else
 								sethiddenproperty(Part,"NetworkIsSleeping",false)
 							end
+							if not Part:FindFirstChildOfClass("BodyVelocity") then
+								local BV = Instance.new("BodyVelocity") --create bodyvelocity to apply constant physics packets and retain ownership
+								BV.Name = "NetworkRetainer"
+								BV.MaxForce = Vector3.new(1/0,1/0,1/0)
+								BV.P = 1/0
+								BV.Velocity = Network["Velocity"]
+								BV.Parent = Part
+							end
 						else
 							table.remove(Network["BaseParts"],i)
 							local BV = Part:FindFirstChildOfClass("BodyVelocity")
@@ -78,6 +102,9 @@ if not getgenv().Network then
 				end
 			end)
 		end
+	end)
+	Network["PartOwnership"]["Disable"] = coroutine.create(function()
+		--ill do it later bleh
 	end)
 	coroutine.resume(Network["PartOwnership"]["Execute"])
 end
