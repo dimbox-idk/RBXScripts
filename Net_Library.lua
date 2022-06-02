@@ -5,6 +5,11 @@ local LocalPlayer = Players.LocalPlayer
 local Velocity = Vector3.new(30,30,30)
 --[[
 Network Library by 4eyes
+
+The basic concepts of Network Ownership for anyone interested:
+1. Parts not network owned by server or another player will be owned by the player closest to it.
+2. To retain network ownership, you must be constantly sending physics packets or people may be able to take ownership, as your network is contested when you aren't sending physics packets.
+
 Usage: Put this in your script and use Network.RetainPart(Part) on any part you'd like to retain ownership over, then just apply a replicating method of movement. Credit me if you'd like.
 loadstring(game:HttpGet("https://raw.githubusercontent.com/your4eyes/RobloxScripts/main/Net_Library.lua"))()
 --]]
