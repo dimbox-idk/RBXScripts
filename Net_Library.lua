@@ -61,7 +61,7 @@ if not getgenv().Network then
 					coroutine.wrap(function()
 						if Part:IsDescendantOf(workspace) then
 							if not isnetworkowner(Part) then --lag parts my ownership is contesting but dont have network over to spite the people who have ownership of stuff i want >:(
-								print("[NETWORK] Part "..Part:GetFullName().." is not owned. Contesting ownership...")
+								print("[NETWORK] Part "..Part:GetFullName().." is not owned. Contesting ownership...") --you can comment this out if you dont want console spam lol
 								sethiddenproperty(Part,"NetworkIsSleeping",true)
 							else
 								sethiddenproperty(Part,"NetworkIsSleeping",false)
