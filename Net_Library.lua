@@ -11,7 +11,7 @@ if not getgenv().Network then
 	getgenv().Network = {}
 	Network["BaseParts"] = {}
 	Network["RetainPart"] = function(Part) --function for retaining ownership of unanchored parts
-		if Part:IsA("BasePart") and not isnetworkowner(Part) then
+		if Part:IsA("BasePart") and Part:IsDescendantOf(workspace) and not isnetworkowner(Part) then
 			local CParts = Part:GetConnectedParts()
 			for _,CPart in pairs(CParts) do --check if part is connected to anything already in baseparts being retained
 				if table.find(Network["BaseParts"],CPart) then
@@ -21,7 +21,7 @@ if not getgenv().Network then
 			end
 			local BV = Instance.new("BodyVelocity") --create bodyvelocity to apply constant physics packets and retain ownership
 			BV.Name = "NetworkRetainer"
-		BV.MaxForce = Vector3.new(1/0,1/0,1/0)
+			BV.MaxForce = Vector3.new(1/0,1/0,1/0)
 			BV.P = 1/0
 			BV.Velocity = Vector3.new(30,30,30)
 			BV.Parent = Part
@@ -50,13 +50,21 @@ if not getgenv().Network then
 			settings().Physics.AllowSleep = false
 			Network["SuperStepper"].Event:Connect(function() --super fast asynchronous loop
 				sethiddenproperty(LocalPlayer,"SimulationRadius",1/0)
-				for _,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
+				for i,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
 					coroutine.wrap(function()
-						if not isnetworkowner(Part) then --lag parts my ownership is contesting but dont have network over to spite the people who have ownership of stuff i want >:(
-							print("[NETWORK] Part "..Part:GetFullName().." is not owned. Contesting ownership...")
-							sethiddenproperty(Part,"NetworkIsSleeping",true)
+						if Part:IsDescendantOf(workspace) then
+							if not isnetworkowner(Part) then --lag parts my ownership is contesting but dont have network over to spite the people who have ownership of stuff i want >:(
+								print("[NETWORK] Part "..Part:GetFullName().." is not owned. Contesting ownership...")
+								sethiddenproperty(Part,"NetworkIsSleeping",true)
+							else
+								sethiddenproperty(Part,"NetworkIsSleeping",false)
+							end
 						else
-							sethiddenproperty(Part,"NetworkIsSleeping",false)
+							table.remove(Network["BaseParts"],i)
+							local BV = Part:FindFirstChildOfClass("BodyVelocity")
+							if BV then
+								BV:Destroy()
+							end
 						end
 						--[==[ [[by 4eyes btw]] ]==]--
 					end)()
