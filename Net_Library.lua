@@ -71,13 +71,21 @@ if not getgenv().Network then
 			workspace.PhysicsSteppingMethod = Enum.PhysicsSteppingMethod.Fixed
 			setscriptable(workspace,"PhysicsSimulationRateReplicator",false)
 			setscriptable(workspace,"PhysicsSteppingMethod",false)
+			Network["PartOwnership"]["PreMethodSettings"].EagerBulkExecution = settings().Rendering.EagerBulkExecution
 			settings().Rendering.EagerBulkExecution = true
+			Network["PartOwnership"]["PreMethodSettings"].ThrottleAdjustTime = settings().Physics.ThrottleAdjustTime
 			settings().Physics.ThrottleAdjustTime = 1/0
+			Network["PartOwnership"]["PreMethodSettings"].ReplicationFocus = LocalPlayer.ReplicationFocus
 			LocalPlayer.ReplicationFocus = workspace
+			Network["PartOwnership"]["PreMethodSettings"].DisableCSGv2 = settings().Physics.DisableCSGv2
 			settings().Physics.DisableCSGv2 = true
+			Network["PartOwnership"]["PreMethodSettings"].AllowSleep = settings().Physics.AllowSleep
 			settings().Physics.AllowSleep = false
+			Network["PartOwnership"]["PreMethodSettings"].ForceCSGv2 = settings().Physics.ForceCSGv2
 			settings().Physics.ForceCSGv2 = false
+			Network["PartOwnership"]["PreMethodSettings"].UseCSGv2 = settings().Physics.UseCSGv2
 			settings().Physics.UseCSGv2 = false
+			Network["PartOwnership"]["PreMethodSettings"].SimulationRadius = gethiddenproperty(LocalPlayer,"SimulationRadius")
 			Network["PartOwnership"]["Connection"] = Network["SuperStepper"].Event:Connect(function() --super fast asynchronous loop
 				sethiddenproperty(LocalPlayer,"SimulationRadius",1/0)
 				for i,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
@@ -113,6 +121,24 @@ if not getgenv().Network then
 	Network["PartOwnership"]["Disable"] = coroutine.create(function()
 		if Network["PartOwnership"]["Connection"] then
 			Network["PartOwnership"]["Connection"]:Disconnect()
+			setscriptable(workspace,"PhysicsSteppingMethod",true)
+			setscriptable(workspace,"PhysicsSimulationRateReplicator",true)
+			settings().Physics.PhysicsEnvironmentalThrottle = Network["PartOwnership"]["PreMethodSettings"].PhysicsEnvironmentalThrottle
+			workspace.PhysicsSimulationRateReplicator = Network["PartOwnership"]["PreMethodSettings"].PhysicsSimulationRateReplicator
+			workspace.InterpolationThrottling = Network["PartOwnership"]["PreMethodSettings"].InterpolationThrottling
+			workspace.PhysicsSteppingMethod = Network["PartOwnership"]["PreMethodSettings"].PhysicsSteppingMethod
+			setscriptable(workspace,"PhysicsSimulationRateReplicator",false)
+			setscriptable(workspace,"PhysicsSteppingMethod",false)
+			settings().Rendering.EagerBulkExecution = Network["PartOwnership"]["PreMethodSettings"].EagerBulkExecution
+			settings().Physics.ThrottleAdjustTime = Network["PartOwnership"]["PreMethodSettings"].ThrottleAdjustTime
+			LocalPlayer.ReplicationFocus = Network["PartOwnership"]["PreMethodSettings"].ReplicationFocus
+			settings().Physics.DisableCSGv2 = Network["PartOwnership"]["PreMethodSettings"].DisableCSGv2
+			settings().Physics.AllowSleep = Network["PartOwnership"]["PreMethodSettings"].AllowSleep
+			settings().Physics.ForceCSGv2 = Network["PartOwnership"]["PreMethodSettings"].ForceCSGv2
+			settings().Physics.UseCSGv2 = Network["PartOwnership"]["PreMethodSettings"].UseCSGv2settings().Physics.UseCSGv2
+			sethiddenproperty(LocalPlayer,"SimulationRadius",Network["PartOwnership"]["PreMethodSettings"].SimulationRadius)
+			Network["PartOwnership"]["PreMethodSettings"] = {}
+			Network["PartOwnership"]["Enabled"] = false
 		end
 	end)
 	coroutine.resume(Network["PartOwnership"]["Enable"])
