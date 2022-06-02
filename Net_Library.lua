@@ -18,7 +18,7 @@ if not getgenv().Network then
 	Network["BaseParts"] = {}
 	Network["Velocity"] = Velocity
 	Network["RetainPart"] = function(Part) --function for retaining ownership of unanchored parts
-		if Part:IsA("BasePart") and Part:IsDescendantOf(workspace) and not isnetworkowner(Part) then
+		if Part:IsA("BasePart") and Part:IsDescendantOf(workspace) then
 			local CParts = Part:GetConnectedParts()
 			for _,CPart in pairs(CParts) do --check if part is connected to anything already in baseparts being retained
 				if table.find(Network["BaseParts"],CPart) then
