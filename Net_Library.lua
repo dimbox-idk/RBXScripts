@@ -138,6 +138,9 @@ if not getgenv().Network then
 			settings().Physics.UseCSGv2 = Network["PartOwnership"]["PreMethodSettings"].UseCSGv2settings().Physics.UseCSGv2
 			sethiddenproperty(LocalPlayer,"SimulationRadius",Network["PartOwnership"]["PreMethodSettings"].SimulationRadius)
 			Network["PartOwnership"]["PreMethodSettings"] = {}
+			for _,Part in pairs(Network["BaseParts"]) do
+				Network["RemovePart"](Part)
+			end
 			Network["PartOwnership"]["Enabled"] = false
 		end
 	end)
