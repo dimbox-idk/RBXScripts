@@ -32,6 +32,7 @@ if not getgenv().Network then
 			BV.P = 1/0
 			BV.Velocity = Network["Velocity"]
 			BV.Parent = Part
+			Part.CustomPhysicalProperties = PhysicalProperties.new(0,0,0,0,0)
 			table.insert(Network["BaseParts"],Part)
 			print("[NETWORK] PartOwnership applied to part"..Part:GetFullName()..".")
 		end
