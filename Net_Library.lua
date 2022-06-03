@@ -26,14 +26,6 @@ if not getgenv().Network then
 					return
 				end
 			end
-			----local BV = Instance.new("BodyGyro") --create bodyvelocity to apply constant physics packets and retain ownership
-			--BV.Name = "NetworkRetainer"
-			---BV.MaxTorque = Vector3.new(1/0,1/0,1/0)
-			--BV.P = 1/0
-			--BV.
-			--BV.Velocity = Network["Velocity"]
-			--BV.Parent = Part
-			--Part.CustomPhysicalProperties = PhysicalProperties.new(0,0,0,0,0)
 			table.insert(Network["BaseParts"],Part)
 			print("[NETWORK] PartOwnership applied to part"..Part:GetFullName()..".")
 		end
@@ -100,17 +92,9 @@ if not getgenv().Network then
 								print("[NETWORK] Part "..Part:GetFullName().." is not owned. Contesting ownership...") --you can comment this out if you dont want console spam lol
 								sethiddenproperty(Part,"NetworkIsSleeping",true)
 							else
-								--sethiddenproperty(Part,"NetworkIsSleeping",false)
+								sethiddenproperty(Part,"NetworkIsSleeping",false)
 							end
 							Part.Velocity = Network["Velocity"]
-							--if not Part:FindFirstChildOfClass("BodyVelocity") then
-							--	local BV = Instance.new("BodyVelocity") --create bodyvelocity to apply constant physics packets and retain ownership
-							--	BV.Name = "NetworkRetainer"
-							--	BV.MaxForce = Vector3.new(1/0,1/0,1/0)
-							--	BV.P = 1/0
-							--	BV.Velocity = Network["Velocity"]
-							--	BV.Parent = Part
-							--end
 						else
 							table.remove(Network["BaseParts"],i)
 							local BV = Part:FindFirstChildOfClass("BodyVelocity")
