@@ -2,7 +2,7 @@ repeat task.wait() until game:IsLoaded()
 local Players = game:GetService("Players") --define variables n shit
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-local Velocity = Vector3.new(14.465,14.465,14.465)
+local Velocity = Vector3.new(20,20,20)
 --[[
 Network Library by 4eyes
 
