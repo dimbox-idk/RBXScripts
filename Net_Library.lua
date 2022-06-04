@@ -2,7 +2,7 @@ repeat task.wait() until game:IsLoaded()
 local Players = game:GetService("Players") --define variables n shit
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-local Velocity = Vector3.new(25,25,25)
+local Velocity = Vector3.new(17.325,17.325,17.325)
 --[[
 Network Library by 4eyes
 
@@ -46,8 +46,7 @@ if not getgenv().Network then
 		end
 	end
 	Network["SuperStepper"] = Instance.new("BindableEvent") --make super fast event to connect to
-	setfflag("NewRunServiceSignals","true")
-	for _,Event in pairs({RunService.RenderStepped,RunService.Heartbeat,RunService.Stepped,RunService.PreSimulation,RunService.PostSimulation}) do
+	for _,Event in pairs({RunService.Stepped,RunService.Heartbeat}) do
 		Event:Connect(function()
 			return Network["SuperStepper"]:Fire(Network["SuperStepper"],tick())
 		end)
@@ -58,49 +57,23 @@ if not getgenv().Network then
 	Network["PartOwnership"]["Enable"] = coroutine.create(function() --creating a thread for network stuff
 		if Network["PartOwnership"]["Enabled"] == false then
 			Network["PartOwnership"]["Enabled"] = true --do cool network stuff before doing more cool network stuff
-			setscriptable(workspace,"PhysicsSteppingMethod",true)
-			setscriptable(workspace,"PhysicsSimulationRateReplicator",true)
-			Network["PartOwnership"]["PreMethodSettings"].PhysicsEnvironmentalThrottle = settings().Physics.PhysicsEnvironmentalThrottle
-			settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
-			Network["PartOwnership"]["PreMethodSettings"].PhysicsSimulationRateReplicator = workspace.PhysicsSimulationRateReplicator
-			workspace.PhysicsSimulationRateReplicator = Enum.PhysicsSimulationRate.Fixed240Hz
-			Network["PartOwnership"]["PreMethodSettings"].PhysicsSteppingMethod = workspace.PhysicsSteppingMethod
-			workspace.PhysicsSteppingMethod = Enum.PhysicsSteppingMethod.Fixed
-			setscriptable(workspace,"PhysicsSimulationRateReplicator",false)
-			setscriptable(workspace,"PhysicsSteppingMethod",false)
-			Network["PartOwnership"]["PreMethodSettings"].EagerBulkExecution = settings().Rendering.EagerBulkExecution
-			settings().Rendering.EagerBulkExecution = true
-			Network["PartOwnership"]["PreMethodSettings"].ThrottleAdjustTime = settings().Physics.ThrottleAdjustTime
-			settings().Physics.ThrottleAdjustTime = 1/0
 			Network["PartOwnership"]["PreMethodSettings"].ReplicationFocus = LocalPlayer.ReplicationFocus
 			LocalPlayer.ReplicationFocus = workspace
-			Network["PartOwnership"]["PreMethodSettings"].DisableCSGv2 = settings().Physics.DisableCSGv2
-			settings().Physics.DisableCSGv2 = true
-			Network["PartOwnership"]["PreMethodSettings"].AllowSleep = settings().Physics.AllowSleep
-			settings().Physics.AllowSleep = false
-			Network["PartOwnership"]["PreMethodSettings"].ForceCSGv2 = settings().Physics.ForceCSGv2
-			settings().Physics.ForceCSGv2 = false
-			Network["PartOwnership"]["PreMethodSettings"].UseCSGv2 = settings().Physics.UseCSGv2
-			settings().Physics.UseCSGv2 = false
 			Network["PartOwnership"]["PreMethodSettings"].SimulationRadius = gethiddenproperty(LocalPlayer,"SimulationRadius")
 			Network["PartOwnership"]["Connection"] = Network["SuperStepper"].Event:Connect(function() --super fast asynchronous loop
 				sethiddenproperty(LocalPlayer,"SimulationRadius",1/0)
-				for i,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
+				for _,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
 					coroutine.wrap(function()
 						if Part:IsDescendantOf(workspace) then
+							Part.Velocity = Network["Velocity"]+Vector3.new(0,math.cos(tick()*50),0)
 							if not isnetworkowner(Part) then --lag parts my ownership is contesting but dont have network over to spite the people who have ownership of stuff i want >:(
-								print("[NETWORK] Part "..Part:GetFullName().." is not owned. Contesting ownership...") --you can comment this out if you dont want console spam lol
+								--print("[NETWORK] Part "..Part:GetFullName().." is not owned. Contesting ownership...") --you can comment this out if you dont want console spam lol
 								sethiddenproperty(Part,"NetworkIsSleeping",true)
 							else
 								sethiddenproperty(Part,"NetworkIsSleeping",false)
 							end
-							Part.Velocity = Network["Velocity"]
 						else
-							table.remove(Network["BaseParts"],i)
-							local BV = Part:FindFirstChildOfClass("BodyVelocity")
-							if BV then
-								BV:Destroy()
-							end
+							Network["RemovePart"](Part)
 						end
 						--[==[ [[by 4eyes btw]] ]==]--
 					end)()
@@ -111,20 +84,7 @@ if not getgenv().Network then
 	Network["PartOwnership"]["Disable"] = coroutine.create(function()
 		if Network["PartOwnership"]["Connection"] then
 			Network["PartOwnership"]["Connection"]:Disconnect()
-			setscriptable(workspace,"PhysicsSteppingMethod",true)
-			setscriptable(workspace,"PhysicsSimulationRateReplicator",true)
-			settings().Physics.PhysicsEnvironmentalThrottle = Network["PartOwnership"]["PreMethodSettings"].PhysicsEnvironmentalThrottle
-			workspace.PhysicsSimulationRateReplicator = Network["PartOwnership"]["PreMethodSettings"].PhysicsSimulationRateReplicator
-			workspace.PhysicsSteppingMethod = Network["PartOwnership"]["PreMethodSettings"].PhysicsSteppingMethod
-			setscriptable(workspace,"PhysicsSimulationRateReplicator",false)
-			setscriptable(workspace,"PhysicsSteppingMethod",false)
-			settings().Rendering.EagerBulkExecution = Network["PartOwnership"]["PreMethodSettings"].EagerBulkExecution
-			settings().Physics.ThrottleAdjustTime = Network["PartOwnership"]["PreMethodSettings"].ThrottleAdjustTime
 			LocalPlayer.ReplicationFocus = Network["PartOwnership"]["PreMethodSettings"].ReplicationFocus
-			settings().Physics.DisableCSGv2 = Network["PartOwnership"]["PreMethodSettings"].DisableCSGv2
-			settings().Physics.AllowSleep = Network["PartOwnership"]["PreMethodSettings"].AllowSleep
-			settings().Physics.ForceCSGv2 = Network["PartOwnership"]["PreMethodSettings"].ForceCSGv2
-			settings().Physics.UseCSGv2 = Network["PartOwnership"]["PreMethodSettings"].UseCSGv2settings().Physics.UseCSGv2
 			sethiddenproperty(LocalPlayer,"SimulationRadius",Network["PartOwnership"]["PreMethodSettings"].SimulationRadius)
 			Network["PartOwnership"]["PreMethodSettings"] = {}
 			for _,Part in pairs(Network["BaseParts"]) do
