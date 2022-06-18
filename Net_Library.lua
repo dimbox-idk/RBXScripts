@@ -13,7 +13,7 @@ Usage: Put this in your script, run the PartOwnership enable coroutine [ corouti
 Example script:
 loadstring(game:HttpGet("https://raw.githubusercontent.com/your4eyes/RobloxScripts/main/Net_Library.lua"))()
 coroutine.resume(Network["PartOwnership"]["Enable"])
---Network.CharacterRelative = false --for reanimates
+Network.CharacterRelative = true --enable if not reanimate
 Network.RetainPart(Part)
 
 --]]
