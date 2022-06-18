@@ -8,11 +8,14 @@ The basic concepts of Network Ownership for anyone interested:
 1. Parts not network owned by server or another player will be owned by the player closest to it.
 2. To retain network ownership, you must be constantly sending physics packets or people may be able to take ownership, as your network is contested when you aren't sending physics packets.
 
-Usage: Put this in your script, run the PartOwnership enable coroutine [ coroutine.resume(Network["PartOwnership"]["Enable"]) ] and use Network.RetainPart(Part) on any part you'd like to retain ownership over, then just apply a replicating method of movement. Network["RemovePart"](Part) to remove ownership of a part, and run the PartOwnership Disable coroutine [ coroutine.resume(Network["PartOwnership"]["Disable"]) ] to stop. Credit me if you'd like.
+Usage: Put this in your script, run the PartOwnership enable coroutine [ coroutine.resume(Network["PartOwnership"]["Enable"]) ] and use Network.RetainPart(Part) on any part you'd like to retain ownership over, then just apply a replicating method of movement. Network["RemovePart"](Part) to remove ownership of a part, and run the PartOwnership Disable coroutine [ coroutine.resume(Network["PartOwnership"]["Disable"]) ] to stop. Set Network.CharacterRelative to false if you change your character to a non-replicating client model. Credit me if you'd like.
 
 Example script:
 loadstring(game:HttpGet("https://raw.githubusercontent.com/your4eyes/RobloxScripts/main/Net_Library.lua"))()
 coroutine.resume(Network["PartOwnership"]["Enable"])
+--Network.CharacterRelative = false --for reanimates
+Network.RetainPart(Part)
+
 --]]
 if not getgenv().Network then
 	getgenv().Network = {
@@ -31,19 +34,32 @@ if not getgenv().Network then
 				end;
 			end;
 		};
+		CharacterRelative = false;
 	}
 	Network["Velocity"] = Vector3.new(17.3205081,17.3205081,17.3205081); --exactly 30 magnitude
 	Network["RetainPart"] = function(Part,ReturnFakePart) --function for retaining ownership of unanchored parts
 		if Part ~= nil and type(Part) == "userdata" and Part:IsA("BasePart") and (type(ReturnFakePart) == "boolean" or type(ReturnFakePart) == "nil") then
 			if Part:IsDescendantOf(workspace) then
 				if not table.find(Network["BaseParts"],Part) then
+					if Network.CharacterRelative == true then
+						local Character = LocalPlayer.Character
+						if Character and Character.PrimaryPart then
+							local Distance = (Character.PrimaryPart.Position-Part.Position).Magnitude
+							if Distance > 1000 then
+								Network["Output"].Send(warn,"RetainPart Warning : PartOwnership not applied to BasePart "..Part:GetFullName()..", as it is more than "..gethiddenproperty(LocalPlayer,"MaximumSimulationRadius").." studs away.")
+								return
+							end
+						else
+							Network["Output"].Send(warn,"RetainPart Warning : PartOwnership not applied to BasePart "..Part:GetFullName()..", as the LocalPlayer Character's PrimaryPart does not exist.")
+							return
+						end
+					end
 					table.insert(Network["BaseParts"],Part)
-					Network["Output"].Send(print,": PartOwnership applied to BasePart "..Part:GetFullName()..".")
 					if ReturnFakePart == true then
 						return FakePart
 					end
 				else
-					Network["Output"].Send(print,": PartOwnership not applied to BasePart "..Part:GetFullName()..", as it already active.")
+					Network["Output"].Send(warn,"RetainPart Warning : PartOwnership not applied to BasePart "..Part:GetFullName()..", as it already active.")
 				end
 			else
 				Network["Output"].Send(error,"RetainPart Error : Instance "..tostring(Part).." is not a BasePart or does not exist in workspace.")
@@ -58,7 +74,7 @@ if not getgenv().Network then
 				local Index = table.find(Network["BaseParts"],Part)
 				if Index then
 					table.remove(Network["BaseParts"],Index)
-					Network["Output"].Send(print,": PartOwnership removed from part "..Part:GetFullName()..".")
+					Network["Output"].Send(print,"RemovePart Output: PartOwnership removed from part "..Part:GetFullName()..".")
 				else
 					Network["Output"].Send(warn,"RemovePart Warning : BasePart "..Part:GetFullName().." not found in BaseParts table.")
 				end
@@ -75,9 +91,9 @@ if not getgenv().Network then
 			return Network["SuperStepper"]:Fire(Network["SuperStepper"],tick())
 		end)
 	end
-	Network["PartOwnership"] = {}
-	Network["PartOwnership"]["PreMethodSettings"] = {}
-	Network["PartOwnership"]["Enabled"] = false
+	Network["PartOwnership"] = {};
+	Network["PartOwnership"]["PreMethodSettings"] = {};
+	Network["PartOwnership"]["Enabled"] = false;
 	Network["PartOwnership"]["Enable"] = coroutine.create(function() --creating a thread for network stuff
 		if Network["PartOwnership"]["Enabled"] == false then
 			Network["PartOwnership"]["Enabled"] = true --do cool network stuff before doing more cool network stuff
@@ -89,12 +105,29 @@ if not getgenv().Network then
 				for _,Part in pairs(Network["BaseParts"]) do --loop through parts and do network stuff
 					coroutine.wrap(function()
 						if Part:IsDescendantOf(workspace) then
-							Part.Velocity = Network["Velocity"]+Vector3.new(0,math.cos(tick()*50),0) --keep network by sending physics packets of 30 magnitude + an everchanging addition in the y level so roblox doesnt get triggered and fuck your ownership
-							if not isnetworkowner(Part) then --lag parts my ownership is contesting but dont have network over to spite the people who have ownership of stuff i want >:(
-								--Network["Output"].Send(print,": Part "..Part:GetFullName().." is not owned. Contesting ownership...") --you can comment this out if you dont want console spam lol
-								sethiddenproperty(Part,"NetworkIsSleeping",true)
-							else
-								sethiddenproperty(Part,"NetworkIsSleeping",false)
+							local Lost = false;
+							if Network.CharacterRelative == true then
+								local Character = LocalPlayer.Character;c
+								if Character and Character.PrimaryPart then
+									local Distance = (Character.PrimaryPart.Position - Part.Position).Magnitude
+									if Distance > 1000 then
+										Network["Output"].Send(warn,"PartOwnership Warning : PartOwnership not applied to BasePart "..Part:GetFullName()..", as it is more than "..gethiddenproperty(LocalPlayer,"MaximumSimulationRadius").." studs away.")
+										Lost = true;
+										Network["RemovePart"](Part)
+									end
+								else
+									Network["Output"].Send(warn,"PartOwnership Warning : PartOwnership not applied to BasePart "..Part:GetFullName()..", as the LocalPlayer Character's PrimaryPart does not exist.")
+									Lost = true;
+								end
+							end
+							if Lost == false then
+								Part.Velocity = Network["Velocity"]+Vector3.new(0,math.cos(tick()*10)/10,0) --keep network by sending physics packets of 30 magnitude + an everchanging addition in the y level so roblox doesnt get triggered and fuck your ownership
+								if not isnetworkowner(Part) then --lag parts my ownership is contesting but dont have network over to spite the people who have ownership of stuff i want >:(
+									--Network["Output"].Send(warn,"PartOwnership Warning : Part "..Part:GetFullName().." is not owned. Contesting ownership...") --you can comment this out if you dont want console spam lol
+									sethiddenproperty(Part,"NetworkIsSleeping",true)
+								else
+									sethiddenproperty(Part,"NetworkIsSleeping",false)
+								end
 							end
 						else
 							Network["RemovePart"](Part)
@@ -103,7 +136,7 @@ if not getgenv().Network then
 					end)()
 				end
 			end)
-			Network["Output"].Send(print,": PartOwnership enabled.")
+			Network["Output"].Send(print,"PartOwnership Output : PartOwnership enabled.")
 		end
 	end)
 	Network["PartOwnership"]["Disable"] = coroutine.create(function()
@@ -116,7 +149,7 @@ if not getgenv().Network then
 				Network["RemovePart"](Part)
 			end
 			Network["PartOwnership"]["Enabled"] = false
-			Network["Output"].Send(print,": PartOwnership disabled.")
+			Network["Output"].Send(print,"PartOwnership Output : PartOwnership disabled.")
 		end
 	end)
 end
