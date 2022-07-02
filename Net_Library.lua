@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 --[[
 Network Library by 4eyes
+This script is meant for debugging and game testing ONLY. Any other use is not encouraged.
 
 The basic concepts of Network Ownership for anyone interested:
 1. Parts not network owned by server or another player will be owned by the player closest to it.
