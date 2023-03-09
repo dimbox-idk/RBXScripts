@@ -115,11 +115,6 @@ if not getgenv().Network then
 				end
 			end
 			Part.AssemblyLinearVelocity = (Part.AssemblyLinearVelocity.Unit+Vector3.new(.01,.01,.01))*(50+math.cos(tick()*10))
-			if not isnetworkowner(Part) then --lag parts my ownership is contesting but dont have network over to spite the people who have ownership of stuff i want >:(
-				sethiddenproperty(Part,"NetworkIsSleeping",true)
-			else
-				sethiddenproperty(Part,"NetworkIsSleeping",false)
-			end
 		else
 			Network["RemovePart"](Part)
 		end
