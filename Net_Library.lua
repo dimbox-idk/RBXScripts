@@ -32,7 +32,7 @@ if not getgenv().Network then
 		TryKeep = true; --loop attempts to
 		PartOwnership = {
 			PreMethodSettings = {};
-			Enabled = false;
+			Enabled = true;
 		};
 	}
 
@@ -62,7 +62,7 @@ if not getgenv().Network then
 				return FakePart
 			end
 		else
-			Network["Output"].Send(warn,"RetainPart Warning : PartOwnership not applied to BasePart "..Part:GetFullName()..", as it already active.")
+			--Network["Output"].Send(warn,"RetainPart Warning : PartOwnership not applied to BasePart "..Part:GetFullName()..", as it already active.")
 			return false
 		end
 	end
